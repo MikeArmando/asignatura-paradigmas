@@ -1,0 +1,1 @@
+# Este es un proyecto de la asignatura de paradigmas de la programación.
