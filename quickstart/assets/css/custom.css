@@ -1,0 +1,20 @@
+/* 1. Remove the maximum width limit on the article container */
+.prose, 
+article, 
+.max-w-prose {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* 2. Expand the main page container to use the full screen width */
+.container, 
+main {
+    max-width: 95% !important; /* Leaves a tiny bit of breathing room on the edges */
+    width: 100% !important;
+}
+
+/* 3. If the content is stuck to the left, center the main wrapper */
+main {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
