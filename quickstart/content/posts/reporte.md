@@ -12,7 +12,7 @@ summary = "Proyecto de la asignatura de paradigmas de la programación."
 
 Link de portafolio en GitHub: [Asignatura Paradigmas](https://github.com/MikeArmando/asignatura-paradigmas)
 
-Link de portafolio en GitHub Pages (página estática): [Asignatura Paradigmas](https://github.com/MikeArmando/asignatura-paradigmas)
+Link de portafolio en GitHub Pages (página estática): [Asignatura Paradigmas](https://mikearmando.github.io/asignatura-paradigmas/)
 
 # 1. ¿Qué es Git y GitHub?
 Aunque suelen mencionarse juntos, cumplen funciones distintas pero complementarias:
