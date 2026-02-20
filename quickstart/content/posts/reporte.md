@@ -118,3 +118,7 @@ Copia una plantilla oficial de Hugo para GitHub Actions. Básicamente, este arch
 1. Ve a tu repositorio en GitHub.
 2. Haz clic en Settings (Configuración) > Pages.
 3. En la sección Build and deployment, cambia la fuente (Source) de "Deploy from a branch" a "GitHub Actions".
+
+
+# Conclusion
+Para concluir, Markdown como formatador de texto es útil a la hora de tener que crear proyectos en donde se necesita introducirlo al público, en especial cuando necesitamos la documentación del proyecto. Para esto es importante conocer las formas en que nosotros podemos darle estilo y forma al texto, conociendo las funcionalidades del Markdown. Otro punto importante fue el proceso de poder subir en github Pages nuestra página estática con toda la información adquirida, ya que aquí tenemos un espacio para poder tener nuestro trabajo público, o en este caso portafolio.
