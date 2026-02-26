@@ -8,7 +8,7 @@ title = 'Reporte'
 summary = "Proyecto de la asignatura de paradigmas de la programación."
 +++
 
-# REPORTE
+# Práctica 0: Uso de repositorios
 
 Link de portafolio en GitHub: [Asignatura Paradigmas](https://github.com/MikeArmando/asignatura-paradigmas)
 
