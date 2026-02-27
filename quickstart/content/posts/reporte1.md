@@ -138,32 +138,32 @@ En el programa se hizo uso de los nodos para almacenar la información, de lo cu
 # Evidencias
 
 ### **Alcance/duració:**
-![EVIDENCIA](/quickstart/assets/img/img2.png)
-![EVIDENCIA](/quickstart/assets/img/img3.png)
+![EVIDENCIA](img/img2.png)
+![EVIDENCIA](img/img3.png)
 
 ### **Memoria:**
-![EVIDENCIA](/quickstart/assets/img/img4.png)
-![EVIDENCIA](/quickstart/assets/img/img5.png)
+![EVIDENCIA](img/img4.png)
+![EVIDENCIA](img/img5.png)
 
 ### **Contratos:**
-![EVIDENCIA](/quickstart/assets/img/img6.png)
-![EVIDENCIA](/quickstart/assets/img/img7.png)
+![EVIDENCIA](img/img6.png)
+![EVIDENCIA](img/img7.png)
 
 
 ## Sesión 1: log/captura mostrando lleno/vacío.
-![EVIDENCIA](/quickstart/assets/img/img8.png)
-![EVIDENCIA](/quickstart/assets/img/img9.png)
-![EVIDENCIA](/quickstart/assets/img/img10.png)
+![EVIDENCIA](img/img8.png)
+![EVIDENCIA](img/img9.png)
+![EVIDENCIA](img/img10.png)
 
 
 ## Sesión 2: log/captura mostrando FIFO y salida limpia.
-![EVIDENCIA](/quickstart/assets/img/img11.png)
-![EVIDENCIA](/quickstart/assets/img/img12.png)
+![EVIDENCIA](img/img11.png)
+![EVIDENCIA](img/img12.png)
 
 
 ## Sesión 3: log/captura/video mostrando progreso y estados.
-![EVIDENCIA](/quickstart/assets/img/img13.png)
-![EVIDENCIA](/quickstart/assets/img/img14.png)
+![EVIDENCIA](img/img13.png)
+![EVIDENCIA](img/img14.png)
 
 # Conclusion
 Para concluir, durante la practica y el desarrollo del programa obtuvimos conocimiento sobre la implementación de la estructura de datos cola de diferentes métodos, esto dando a conocer las diferentes ventajas y desventajas de cada uno. Al implementar las diferentes versiones del programa se pudo observar las diferencias entre el uso del stack y del heap, así como los elementos que se almacenan/usan cada uno de estos dos. También se conoció más a fondo el uso adecuado del almacenamiento de información con la cola estática y la cola dinámica, teniendo en cuenta el uso y liberación de memoria con las funciones malloc() y free(). Esto nos permitió llevar a cabo un análisis comparativo entre estos dos métodos de la programación.
