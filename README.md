@@ -1,1 +1,2 @@
-# Este es un proyecto de la asignatura de paradigmas de la programación.
+# Paradigmas de la programación
+Proyecto de la asignatura de paradigmas de la programación
