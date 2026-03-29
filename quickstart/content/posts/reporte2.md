@@ -4,7 +4,7 @@ title = 'Reporte No. 2'
 
 [header]
   featured = true
-summary = "Proyecto de la asignatura de paradigmas de la programación."
+summary = "Práctica 1: Elementos básicos de los lenguajes de programación"
 +++
 
 # Práctica 1: Elementos básicos de los lenguajes de programación
@@ -110,7 +110,7 @@ Para este programa fue necesario el uso de structs, esto ya que se ocupa una est
 A la hora de procesar el trabajo, se muestra en consola la impresión de las páginas por trabajo. Esta simulación fue lograda por medio de la librería Windows y su función SLEEP(), a la cual se le especifica esperar 1000ms por trabajo, con esto se mostrará un porcentaje de que tan completo está el trabajo en procesar. Se toma en cuenta la cantidad de copias que se pidió.
 
 **Evidencia de simulacion de impresión:**
-![EVIDENCIA](/quickstart/assets/img/img1.png)
+![EVIDENCIA](img/img1.png)
 
 # Análisis comparativo
 Las estructuras de datos son esenciales para el almacenamiento y gestión de la información cuando estamos trabajando con colas, como en el caso de nuestro programa, se tiene la opción de dos estilos/modos en los que podemos implementar esta estructura para cumplir con el programa. Estas dos formas son con la implementación de la cola estática y con la cola dinámica, ambas ofreciendo sus beneficios y ventajas sobre la otra. En seguida se analizarán estos dos métodos de implementación y llevar a cabo un análisis comparativo para explorar estas mismas ventajas y desventajas.
