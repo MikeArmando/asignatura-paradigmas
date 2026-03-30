@@ -475,6 +475,144 @@ La arquitectura de la sesión 3 sigue el patrón **Model-View-Controller**:
 
 ---
 
+## 6. Preguntas guía de aprendizaje
+ 
+### Pregunta 1 — ¿Qué clase concentra la responsabilidad de asignar spots y por qué?
+ 
+La clase `ParkingLot` es la única responsable de asignar spots. Esto se hace deliberadamente por dos razones relacionadas con el diseño orientado a objetos.
+ 
+La primera razón es la **cohesión**: `ParkingLot` es la única clase que tiene visibilidad sobre la colección completa de spots (`self._spots`). Para asignar un lugar, necesitas conocer todos los lugares disponibles y cuáles son compatibles con el tipo de vehículo que entra. Ninguna otra clase tiene ni debería tener esa visión global.
+ 
+La segunda razón es la **protección de la invariante principal del sistema**: nunca dos vehículos en el mismo spot. Al centralizar la asignación en un único método (`_find_available_spot` llamado desde `enter()`), se garantiza que la lógica de búsqueda y ocupación ocurre en un solo lugar controlado. Si la asignación estuviera distribuida en múltiples clases, sería mucho más difícil garantizar esa invariante.
+ 
+---
+ 
+### Pregunta 2 — ¿Qué invariantes protege tu modelo? (al menos 2)
+ 
+El modelo protege tres invariantes formales:
+ 
+**Invariante 1 — Un lugar solo puede ser ocupado por un vehículo a la vez.**
+ 
+Protegida en `ParkingSpot.park()`. Antes de cambiar `_occupied = True`, el método verifica que el lugar no esté ya ocupado. Si lo está, lanza una excepción y el estado del objeto no cambia. Es imposible llegar a un estado donde `_occupied` sea `True` dos veces seguidas sin haber pasado por `release()`.
+ 
+```python
+def park(self, vehicle: Vehicle) -> None:
+    if self._occupied:
+        raise RuntimeError(f"Invariante violada: {self._spot_id} ya está ocupado.")
+    self._occupied = True
+    self._current_vehicle = vehicle
+```
+ 
+**Invariante 2 — Un ticket cerrado no puede cerrarse nuevamente.**
+ 
+Protegida en `Ticket.close()`. El ciclo de vida de un ticket es estrictamente `ACTIVE → CLOSED`, en una sola dirección. Si se intenta cerrar un ticket ya cerrado, el método lanza una excepción antes de modificar nada. Esto previene cobros duplicados y liberaciones incorrectas de spots.
+ 
+```python
+def close(self, exit_time: datetime) -> None:
+    if self._status == TicketStatus.CLOSED:
+        raise ValueError(f"El ticket #{self._ticket_id} ya está cerrado.")
+    self._exit_time = exit_time
+    self._status = TicketStatus.CLOSED
+```
+ 
+**Invariante 3 — Un vehículo no puede entrar si ya tiene un ticket activo.**
+ 
+Protegida en `ParkingLot.enter()`. Antes de asignar cualquier spot, se revisa que las placas del vehículo no aparezcan ya en los tickets activos. Esto evita que el mismo vehículo ocupe dos spots simultáneamente.
+ 
+```python
+def enter(self, vehicle: Vehicle, now: datetime) -> Ticket:
+    for ticket in self._active_tickets.values():
+        if ticket.get_vehicle().get_plate() == vehicle.get_plate():
+            raise ValueError(f"{vehicle.get_plate()} ya está en el estacionamiento.")
+    ...
+```
+ 
+---
+ 
+### Pregunta 3 — ¿Dónde se aplica polimorfismo y qué ventaja aporta en tu diseño?
+ 
+El polimorfismo se aplica en dos lugares del sistema, ambos relacionados con la interfaz `RatePolicy`.
+ 
+**Aplicación 1 — Intercambio de políticas de cobro completas.**
+ 
+`ParkingLot` mantiene una referencia a `_policy: RatePolicy`. En tiempo de ejecución, esa referencia puede apuntar a `HourlyRatePolicy` o a `FlatRatePolicy`. El método `exit()` siempre llama `self._policy.calculate(hours, vehicle)`. El mismo código produce resultados radicalmente distintos según qué objeto esté en `_policy`:
+ 
+```python
+# Con HourlyRatePolicy — cobra por hora:
+cost = policy.calculate(2.0, car)     # → $40.00
+ 
+# Con FlatRatePolicy — cobra tarifa fija:
+cost = policy.calculate(2.0, car)     # → $50.00  (misma llamada, distinto resultado)
+```
+ 
+**Aplicación 2 — Comportamiento diferenciado por subtipo de vehículo.**
+ 
+Dentro de `HourlyRatePolicy.calculate()`, el resultado varía dependiendo del subtipo de `Vehicle` recibido. `Car` y `Motorcycle` son tratados polimórficamente: ambos son `Vehicle`, pero producen tarifas distintas.
+ 
+```python
+def calculate(self, hours: float, vehicle: Vehicle) -> float:
+    rate = self._car_rate if vehicle.get_type() == VehicleType.CAR else self._moto_rate
+    return round(hours * rate, 2)
+    # Car 2h  → $40.00
+    # Moto 2h → $20.00
+```
+ 
+**Ventaja concreta en el diseño:** el polimorfismo desacopla la decisión de *qué cobrar* de la mecánica de *cómo funciona el estacionamiento*. Cuando se añadió `FlatRatePolicy` en la sesión 2, no se modificó ni una sola línea de `ParkingLot`, `Ticket`, `ParkingSpot` ni de ninguna ruta de Flask. Solo se creó una nueva clase y se inyectó. Si en el futuro se necesitan tarifas por día, por membresía o con descuentos, el mismo patrón aplica: nueva clase, cero modificaciones al sistema existente.
+ 
+---
+ 
+### Pregunta 4 — ¿Qué parte del sistema pertenece a Model, View y Controller en tu Flask?
+ 
+| Capa | Archivos | Qué contiene |
+|---|---|---|
+| **Model** | `models/vehicle.py`, `models/spot.py`, `models/ticket.py`, `models/parking_lot.py`, `models/rates.py` | Toda la lógica de negocio: clases del dominio, reglas de validación, cálculo de tarifas, gestión de spots y tickets. No importa Flask. No sabe nada de HTTP. |
+| **View** | `templates/base.html`, `templates/dashboard.html`, `templates/entry.html`, `templates/exit.html` | HTML puro con sintaxis Jinja2. Recibe variables del controlador y las renderiza. No calcula nada, no valida nada. |
+| **Controller** | `app.py` (funciones de ruta: `dashboard`, `entry_post`, `exit_post`, etc.) | Recibe la petición HTTP, extrae los datos del formulario, llama al modelo, maneja excepciones y decide qué vista renderizar. |
+ 
+La regla que se siguió estrictamente fue: **ninguna lógica de negocio en el controlador**. Por ejemplo, la lógica de "buscar un spot compatible y crear un ticket" no está en `entry_post()` de `app.py` — está en `ParkingLot.enter()`. El controlador solo orquesta:
+ 
+```
+Petición HTTP → Controller → llama a Model → Model devuelve resultado → Controller → View
+```
+ 
+Esto tiene una consecuencia práctica directa: el mismo modelo que usa Flask también lo usa `cli.py` sin ninguna modificación. El modelo es completamente independiente de la capa de presentación.
+ 
+---
+ 
+### Pregunta 5 — Si mañana cambian las tarifas, ¿qué clase(es) tocarías y por qué?
+ 
+Depende del tipo de cambio, pero en todos los casos la respuesta es la misma categoría de archivo: **solo las clases en `models/rates.py`**, y ninguna otra.
+ 
+**Caso A — Cambiar los valores de la tarifa horaria** (por ejemplo, de $20 a $25 por hora para autos):
+ 
+Solo se modifica el valor por defecto en `HourlyRatePolicy.__init__()`, o simplemente se instancia con el nuevo valor:
+ 
+```python
+# Solo cambia esto:
+HourlyRatePolicy(car_rate=25.0, moto_rate=12.0)
+```
+ 
+No se toca `ParkingLot`, `Ticket`, `app.py` ni ningún template.
+ 
+**Caso B — Agregar una nueva política** (por ejemplo, `NightRatePolicy` que cobra doble entre las 22:00 y las 06:00):
+ 
+Se crea una nueva clase en `rates.py` que implementa el contrato de `RatePolicy`:
+ 
+```python
+class NightRatePolicy:
+    def calculate(self, hours: float, vehicle: Vehicle) -> float:
+        base = 20.0 if vehicle.get_type() == VehicleType.CAR else 10.0
+        return round(hours * base * 2, 2)   # tarifa doble nocturna
+ 
+    def describe(self) -> str:
+        return "Tarifa nocturna — tarifa doble"
+```
+ 
+Luego se inyecta: `parking_lot.set_policy(NightRatePolicy())`. El resto del sistema no sabe ni le importa.
+ 
+**¿Por qué solo `rates.py`?** Porque desde el principio se aisló la lógica de cobro detrás de la abstracción `RatePolicy`. `ParkingLot` nunca pregunta "¿cómo calculas el costo?" — simplemente llama `calculate()` y confía en que la implementación hará lo correcto. Este es exactamente el beneficio del Principio Abierto/Cerrado aplicado en la práctica: el sistema está *abierto* a nuevas tarifas sin necesidad de *modificar* el código existente.
+ 
+
 ## 6. Conclusiones
 
 El primer paso y el más importante fue identificar correctamente las entidades del problema y asignar a cada clase una única responsabilidad. La clase `ParkingLot` actúa como coordinadora sin duplicar lógica que pertenece a `ParkingSpot` o `Ticket`. Esta separación hizo que el código fuera legible y fácil de extender. Proteger los atributos internos con el prefijo `_` y forzar el acceso a través de métodos con validación demostró su valor especialmente en `ParkingSpot.park()`. Definir `RatePolicy` como un `Protocol` fue la decisión de diseño con mayor impacto en extensibilidad. Cuando se añadió `FlatRatePolicy` en la sesión 2, no fue necesario tocar ni una línea de `ParkingLot`. El mismo `exit()` funcionó con la nueva política sin modificarse. Esto confirmó en la práctica el Principio Abierto/Cerrado: el sistema estaba abierto a extensión y cerrado a modificación. Usar `Vehicle` como clase abstracta forzó a que siempre se trabaje con subtipos concretos (`Car`, `Motorcycle`), eliminando estados ambiguos. La herencia evitó duplicación de código: la validación de placas, los accesores y la representación en cadena se escribieron una sola vez en `Vehicle`. La sesión 3 demostró el verdadero valor de haber diseñado bien el modelo primero. Las rutas en `app.py` quedaron delgadas porque toda la lógica ya existía en `models/`. Si el modelo hubiera estado acoplado al menú de consola, migrar a Flask habría requerido reescribir todo. Al tener el modelo independiente, la migración fue añadir un controlador nuevo sin cambiar nada en `models/`. En conjunto, la práctica mostró que los conceptos de POO no son elementos aislados: la encapsulación protege el estado que la composición conecta, la abstracción habilita el polimorfismo, y la herencia organiza los subtipos. El MVC es la consecuencia natural de aplicar bien estos principios: cuando cada clase tiene una sola responsabilidad, la separación en capas surge de forma casi automática.
